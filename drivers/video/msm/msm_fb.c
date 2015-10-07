@@ -46,9 +46,6 @@
 #include <linux/sw_sync.h>
 #include <linux/file.h>
 
-#include <linux/cpu.h>
-#include "../../../arch/arm/mach-msm/acpuclock.h"
-
 #ifdef CONFIG_SEC_DEBUG
 #include <mach/sec_debug.h>
 #endif
@@ -415,6 +412,20 @@ static ssize_t mdp_set_rgb(struct device *dev,
 	}
 
 	return -EINVAL;
+}
+
+void mdp_restore_rgb(void)
+{
+	struct mdp_pcc_cfg_data pcc_cfg;
+
+	memset(&pcc_cfg, 0, sizeof(struct mdp_pcc_cfg_data));
+
+	pcc_cfg.block = MDP_BLOCK_DMA_P;
+	pcc_cfg.ops = MDP_PP_OPS_ENABLE | MDP_PP_OPS_WRITE;
+	pcc_cfg.r.r = pcc_r;
+	pcc_cfg.g.g = pcc_g;
+	pcc_cfg.b.b = pcc_b;
+	mdp4_pcc_cfg(&pcc_cfg);
 }
 
 static DEVICE_ATTR(msm_fb_type, S_IRUGO, msm_fb_msm_fb_type, NULL);
@@ -1242,15 +1253,6 @@ static void msm_fb_imageblit(struct fb_info *info, const struct fb_image *image)
 	}
 }
 
-static void __ref pump_up_the_jam(void)
-{
-	int cpu = 0;
-	for_each_possible_cpu(cpu) {
-		cpu_up(cpu);
-		acpuclk_set_rate(cpu, 1512000, SETRATE_CPUFREQ);
-	}
-}
-
 static int msm_fb_blank(int blank_mode, struct fb_info *info)
 {
 	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)info->par;
@@ -1265,10 +1267,8 @@ static int msm_fb_blank(int blank_mode, struct fb_info *info)
 	if (mfd->op_enable == 0) {
 		if (blank_mode == FB_BLANK_UNBLANK) {
 			mfd->suspend.panel_power_state = MDP_PANEL_POWER_ON;
-			pump_up_the_jam();
 		} else if (blank_mode == FB_BLANK_VSYNC_SUSPEND) {
 			mfd->suspend.panel_power_state = MDP_PANEL_POWER_DOZE;
-			pump_up_the_jam();
 		} else {
 			mfd->suspend.panel_power_state = MDP_PANEL_POWER_OFF;
 		}
