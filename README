@@ -1,7 +1,10 @@
 README
 
-For the aklu-lionheart kernel, use the arch/arm/aklu_jf_defconfig file for your build.
 This was designed to be used on a Samsung Galaxy S4, SGH-M919, T-Mobile phone (JFLTETMO), but may be used on other JF variants. It was sucessfully tested on an i9505, and a JFLTEAIO.
+
+For the aklu-developer2 kernel, use the arch/arm/akludev2_jf_defconfig file for your build.
+For the aklu-fastcharge kernel, use the arch/arm/akluf_jf_defconfig file for your build.
+For the aklu-lionheart kernel, use the arch/arm/aklu_jf_defconfig file for your build.
 
 Feel free to use any of this material!
 
